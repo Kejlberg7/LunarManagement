@@ -23,6 +23,8 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     venue: fixtures.venue,
     address: fixtures.address,
     result: fixtures.result,
+    responseDeadline: fixtures.responseDeadline,
+    confirmedOptionId: fixtures.confirmedOptionId,
     sourceType: fixtures.sourceType,
     sourceUpdatedAt: fixtures.sourceUpdatedAt,
     status: fixtures.status,
@@ -55,6 +57,8 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   }).from(availabilityResponses)
     .innerJoin(teamMembers, eq(availabilityResponses.memberId, teamMembers.id))
     .where(eq(teamMembers.teamId, match.teamId)) : [];
+  const members = await db.select({ id: teamMembers.id, name: teamMembers.name }).from(teamMembers)
+    .where(eq(teamMembers.teamId, match.teamId)).orderBy(asc(teamMembers.rank));
 
   const pollOptions = options.map((option) => {
     const matching = responses.filter((response) => response.optionId === option.id);
@@ -64,8 +68,9 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
       available: matching.filter((row) => row.response === "available").length,
       maybe: matching.filter((row) => row.response === "maybe").length,
       unavailable: matching.filter((row) => row.response === "unavailable").length,
+      responses: members.map((person) => ({ name: person.name, response: matching.find((row) => row.memberId === person.id)?.response ?? null })),
       myResponse: matching.find((row) => row.memberId === member?.id)?.response,
-      confirmed: match.scheduledAt?.getTime() === option.startsAt.getTime(),
+      confirmed: match.confirmedOptionId === option.id,
     };
   });
 
@@ -85,7 +90,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         <p className="match-lead">{dateLabel(match.scheduledAt)} · {match.address ?? match.homeAddress}</p>
         <div className="match-layout">
           <div className="stack">
-            <PollTools matchId={match.id} options={pollOptions} canManage={["owner", "captain"].includes(access.role)} canRespond={Boolean(member)} />
+            <PollTools matchId={match.id} options={pollOptions} deadline={match.responseDeadline?.toISOString() ?? null} canManage={["owner", "captain"].includes(access.role)} canRespond={Boolean(member)} />
             <section className="card">
               <div className="card-head"><div><h2 className="card-title">Kampinformation</h2><p className="card-subtitle">{match.sourceType === "rankedin_public" ? "Læst fra RankedIn til piloten" : match.sourceType === "csv" ? "Importeret fra CSV" : "Oprettet i holdappen"}{match.sourceUpdatedAt ? ` · ${new Intl.DateTimeFormat("da-DK", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Copenhagen" }).format(match.sourceUpdatedAt)}` : ""}</p></div></div>
               <div className="info-row"><span>Kamp</span><strong>{home ? "Hjemme" : "Ude"} mod {match.opponent}</strong></div>

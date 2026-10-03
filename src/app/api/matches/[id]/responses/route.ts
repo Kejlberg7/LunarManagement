@@ -16,12 +16,15 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   if (!body.optionId || !["available", "maybe", "unavailable"].includes(body.response ?? "")) {
     return NextResponse.json({ error: "Vælg en gyldig tilgængelighed." }, { status: 400 });
   }
-  const [match] = await db.select({ teamId: seasons.teamId, optionId: availabilityOptions.id })
+  const [match] = await db.select({ teamId: seasons.teamId, optionId: availabilityOptions.id, deadline: fixtures.responseDeadline })
     .from(fixtures)
     .innerJoin(seasons, eq(fixtures.seasonId, seasons.id))
     .innerJoin(availabilityOptions, and(eq(availabilityOptions.fixtureId, fixtures.id), eq(availabilityOptions.id, body.optionId)))
     .where(eq(fixtures.id, id)).limit(1);
   if (!match) return NextResponse.json({ error: "Datoen blev ikke fundet." }, { status: 404 });
+  if (match.deadline && match.deadline < new Date()) {
+    return NextResponse.json({ error: "Svarfristen er udløbet." }, { status: 409 });
+  }
   const [member] = await db.select({ id: teamMembers.id }).from(teamMembers)
     .innerJoin(teamAccess, and(eq(teamAccess.teamId, teamMembers.teamId), eq(teamAccess.userId, session.userId)))
     .where(and(eq(teamMembers.teamId, match.teamId), eq(teamMembers.userId, session.userId))).limit(1);

@@ -21,19 +21,30 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "Kun kaptajnen kan oprette en datoafstemning." }, { status: 403 });
   }
 
-  const body = await request.json() as { options?: { startsAt?: string; endsAt?: string }[] };
-  const options = (body.options ?? []).slice(0, 8).map((option) => ({
+  const body = await request.json() as { options?: { startsAt?: string; endsAt?: string }[]; deadline?: string };
+  const options = (body.options ?? []).slice(0, 3).map((option) => ({
     fixtureId: id,
     startsAt: new Date(option.startsAt ?? ""),
     endsAt: option.endsAt ? new Date(option.endsAt) : null,
   }));
-  if (!options.length || options.some((option) =>
+  const deadline = new Date(body.deadline ?? "");
+  if (!Number.isFinite(deadline.getTime()) || deadline <= new Date() ||
+    (body.options ?? []).length > 3 || !options.length || options.some((option) =>
     !Number.isFinite(option.startsAt.getTime()) || option.startsAt <= new Date() ||
     (option.endsAt && (!Number.isFinite(option.endsAt.getTime()) || option.endsAt <= option.startsAt)),
   )) {
-    return NextResponse.json({ error: "Tilføj mindst én gyldig dato." }, { status: 400 });
+    return NextResponse.json({ error: "Tilføj 1–3 fremtidige datoer og en gyldig svarfrist." }, { status: 400 });
   }
-  await db.insert(availabilityOptions).values(options);
+  if (deadline >= new Date(Math.min(...options.map((option) => option.startsAt.getTime())))) {
+    return NextResponse.json({ error: "Svarfristen skal ligge før den første foreslåede dato." }, { status: 400 });
+  }
+  const existing = await db.select({ id: availabilityOptions.id }).from(availabilityOptions)
+    .where(eq(availabilityOptions.fixtureId, id));
+  if (existing.length) return NextResponse.json({ error: "Kampen har allerede en afstemning." }, { status: 409 });
+  await db.transaction(async (tx) => {
+    await tx.insert(availabilityOptions).values(options);
+    await tx.update(fixtures).set({ responseDeadline: deadline }).where(eq(fixtures.id, id));
+  });
   const teamUsers = await db.select({ userId: teamAccess.userId }).from(teamAccess).where(eq(teamAccess.teamId, match.teamId));
   await notifyUsers(teamUsers.map((row) => row.userId).filter((userId) => userId !== session.userId), {
     title: "Ny kampafstemning",

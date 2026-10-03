@@ -26,7 +26,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "Kun kaptajnen kan bekræfte kampdatoen." }, { status: 403 });
   }
 
-  await db.update(fixtures).set({ scheduledAt: match.startsAt, status: "scheduled" }).where(eq(fixtures.id, id));
+  await db.update(fixtures).set({ scheduledAt: match.startsAt, confirmedOptionId: body.optionId, status: "scheduled" }).where(eq(fixtures.id, id));
   const teamUsers = await db.select({ userId: teamAccess.userId }).from(teamAccess)
     .where(and(eq(teamAccess.teamId, match.teamId), inArray(teamAccess.role, ["captain", "owner", "player"])));
   await notifyUsers(teamUsers.map((row) => row.userId), {
