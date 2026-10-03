@@ -35,10 +35,10 @@ npm run dev
 
 ## Produktion
 
-1. Opret et Vercel-projekt for GitHub-repoet med `kejlberg7@gmail.com`.
-2. Opret en Neon database på samme konto og forbind den til Vercel.
-3. Sæt `SESSION_SECRET`, `BOOTSTRAP_ADMIN_EMAIL`, `APP_URL` og SMTP-variabler i Vercel.
-4. Opret VAPID-nøgler med `npx web-push generate-vapid-keys` og sæt `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` og `VAPID_SUBJECT`.
-5. Deploy appen. Træk derefter produktionsvariabler ned med `vercel env pull .env.local`, og kør `npm run db:push` og `npm run db:seed` lokalt mod Neon.
+Piloten er deployet på [lunar-management.vercel.app](https://lunar-management.vercel.app). Vercel-projektet er knyttet til dette repo, Neon-databasen er oprettet i Frankfurt, og skemaet samt pilotdata er lagt ind.
+
+Produktionsmiljøet har `DATABASE_URL`, `SESSION_SECRET`, `BOOTSTRAP_ADMIN_EMAIL`, `APP_URL` og VAPID-variabler sat. Nye commits til `main` deployes automatisk. Før holdet kan bruge e-mail-login, skal der stadig vælges og sættes en SMTP-afsender (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` og eventuelt `EMAIL_FROM`).
+
+Lokal `.env.local` ligger kun på udviklermaskinen og er ignoreret af Git. Den har udviklingstilstand med loginlink i terminalen, så lokal afprøvning ikke kræver en SMTP-afsender.
 
 Login-linket er en engangsnøgle, der udløber efter 15 minutter. SMTP-afsenderen skal derfor sættes op før andre end den lokale udvikler kan logge ind. OpenAI-nøgler må ikke tilføjes som klientvariabler; ingen OpenAI-kald er implementeret.

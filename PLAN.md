@@ -126,7 +126,8 @@ Brug samme grundmønster som de nyere apps:
 - Neon Postgres som database og Drizzle ORM til skema/migrationer
 - `DATABASE_URL` fra Neon i Vercel Production og lokal `.env.local`
 - Server-side sessions/invitationer; ingen hemmeligheder eller RankedIn API-nøgle i browseren
-- Brugerens Vercel- og Neon-konto skal være `kejlberg7@gmail.com`; projektet sættes først i drift, når kontotilknytningen og domænet er afklaret
+- Vercel- og Neon-projektet er oprettet under `kejlberg7@gmail.com`; appen er deployet på `https://lunar-management.vercel.app`
+- Neon-skema og pilotdata for Piranha Padel er oprettet. Login-link kræver stadig en SMTP-afsender, før kaptajn og spillere kan logge ind i produktion.
 
 ## Aftalte produktvalg og resterende afklaring
 
