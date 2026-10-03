@@ -25,6 +25,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     status: fixtures.status,
     rankedInUrl: fixtures.rankedInUrl,
     teamId: seasons.teamId,
+    seasonId: seasons.id,
     teamName: teams.name,
     homeAddress: teams.homeAddress,
     rankedInTeamUrl: teams.rankedInUrl,
@@ -65,15 +66,16 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   });
 
   const home = match.homeAway === "home";
+  const overviewHref = `/?team=${match.teamId}&season=${match.seasonId}`;
   return (
     <div className="shell">
       <aside className="sidebar">
-        <Link className="brand" href="/"><span className="brand-mark">L</span><span className="brand-name">Lunar Holdmanager</span></Link>
-        <div style={{ width: "100%" }}><p className="nav-label">Hold</p><Link className="nav-link" href="/"><span>⌂</span><span className="nav-text">Overblik</span></Link></div>
+        <Link className="brand" href={overviewHref}><span className="brand-mark">L</span><span className="brand-name">Lunar Holdmanager</span></Link>
+        <div style={{ width: "100%" }}><p className="nav-label">Hold</p><Link className="nav-link" href={overviewHref}><span>⌂</span><span className="nav-text">Overblik</span></Link></div>
         <div className="sidebar-spacer" />
       </aside>
       <main className="main">
-        <header className="topbar"><Link className="text-link" href="/">← Tilbage til overblik</Link><span className="badge">{match.pool}</span></header>
+        <header className="topbar"><Link className="text-link" href={overviewHref}>← Tilbage til overblik</Link><span className="badge">{match.pool}</span></header>
         <div className="eyebrow">{match.teamName} · {home ? "Hjemmekamp" : "Udekamp"}</div>
         <h1>{home ? `${match.teamName} mod ${match.opponent}` : `${match.opponent} mod ${match.teamName}`}</h1>
         <p className="match-lead">{dateLabel(match.scheduledAt)} · {match.address ?? match.homeAddress}</p>

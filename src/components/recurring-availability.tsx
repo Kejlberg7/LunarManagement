@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const weekdays = ["Søn", "Man", "Tir", "Ons", "Tor", "Fre", "Lør"];
 
-export function RecurringAvailability() {
+export function RecurringAvailability({ teamId }: { teamId: string }) {
   const [days, setDays] = useState<number[]>([]);
   const [startsAt, setStartsAt] = useState("17:00");
   const [endsAt, setEndsAt] = useState("21:00");
@@ -12,7 +12,7 @@ export function RecurringAvailability() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    fetch("/api/availability/recurring")
+    fetch(`/api/availability/recurring?teamId=${encodeURIComponent(teamId)}`)
       .then((response) => response.json())
       .then((data: { availability?: { weekday: number; startsAt: string; endsAt: string }[] }) => {
         const slots = data.availability ?? [];
@@ -23,7 +23,7 @@ export function RecurringAvailability() {
         }
       })
       .catch(() => setMessage("Dine faste tider kunne ikke hentes."));
-  }, []);
+  }, [teamId]);
 
   async function save() {
     setBusy(true);
@@ -31,7 +31,7 @@ export function RecurringAvailability() {
     try {
       const response = await fetch("/api/availability/recurring", {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slots: days.map((weekday) => ({ weekday, startsAt, endsAt })) }),
+        body: JSON.stringify({ teamId, slots: days.map((weekday) => ({ weekday, startsAt, endsAt })) }),
       });
       const data = await response.json() as { error?: string };
       if (!response.ok) throw new Error(data.error ?? "Gemning mislykkedes.");

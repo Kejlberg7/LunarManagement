@@ -7,7 +7,7 @@ export default function LoginPage() {
       <section className="login-aside">
         <div className="brand"><span className="brand-mark">L</span><span className="brand-name">Lunar Holdmanager</span></div>
         <div>
-          <span className="eyebrow" style={{ color: "#bdd0c6" }}>Lunar Ligaen · Piranha Padel</span>
+          <span className="eyebrow" style={{ color: "#bdd0c6" }}>Lunar Ligaen · Holdmanager</span>
           <h1>Holdet samlet.<br />Kampene på plads.</h1>
           <p>Find en dato, få styr på hvem der kan, og sørg for at alle ved, hvor holdet skal spille.</p>
         </div>

@@ -16,12 +16,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Skriv en gyldig e-mailadresse." }, { status: 400 });
     }
 
-    const [member] = await db.select({ teamId: teamMembers.teamId, memberId: teamMembers.id, role: teamMembers.role })
+    const memberships = await db.select({ teamId: teamMembers.teamId, memberId: teamMembers.id, role: teamMembers.role })
       .from(teamMembers)
-      .where(sql`lower(${teamMembers.email}) = ${email}`)
-      .limit(1);
+      .where(sql`lower(${teamMembers.email}) = ${email}`);
     const isBootstrapAdmin = process.env.BOOTSTRAP_ADMIN_EMAIL?.trim().toLowerCase() === email;
-    if (!member && !isBootstrapAdmin) {
+    if (!memberships.length && !isBootstrapAdmin) {
       return NextResponse.json({ error: "Denne e-mail er ikke på holdlisten. Bed kaptajnen om at tilføje dig." }, { status: 403 });
     }
 
@@ -30,17 +29,15 @@ export async function POST(request: Request) {
       set: { email },
     }).returning({ id: users.id, email: users.email });
 
-    if (member) {
-      const role = member.role === "captain" ? "captain" : member.role === "admin" ? "owner" : "player";
-      await db.insert(teamAccess).values({ teamId: member.teamId, userId: user.id, role }).onConflictDoUpdate({
-        target: [teamAccess.teamId, teamAccess.userId],
-        set: { role },
-      });
+    for (const member of memberships) {
+      const role = ["captain", "vice_captain"].includes(member.role) ? "captain" : member.role === "admin" ? "owner" : "player";
+      await db.insert(teamAccess).values({ teamId: member.teamId, userId: user.id, role }).onConflictDoNothing();
       await db.update(teamMembers).set({ userId: user.id }).where(eq(teamMembers.id, member.memberId));
     }
 
     if (isBootstrapAdmin) {
-      const [team] = await db.select({ id: teams.id }).from(teams).limit(1);
+      const [team] = await db.select({ id: teams.id }).from(teams)
+        .where(eq(teams.rankedInId, "T003281428")).limit(1);
       if (team) {
         await db.insert(teamAccess).values({ teamId: team.id, userId: user.id, role: "owner" }).onConflictDoUpdate({
           target: [teamAccess.teamId, teamAccess.userId],

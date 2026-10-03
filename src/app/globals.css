@@ -12,7 +12,7 @@
 * { box-sizing: border-box; }
 html { background: var(--paper); }
 body { margin: 0; color: var(--ink); font-family: Arial, Helvetica, sans-serif; }
-button, input { font: inherit; }
+button, input, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 
 .shell { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
@@ -127,8 +127,32 @@ h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -.055em; line-height: 
 .notice-title { color: var(--ink); font-size: 12px; font-weight: 700; text-decoration: none; }
 .notice-row p { color: var(--muted); font-size: 12px; margin: 5px 0; }
 .notice-row span { color: #98a39b; font-size: 10px; }
+.teams-page { max-width: 1400px; margin: 0 auto; }
+.teams-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 48px; }
+.teams-page > .card-subtitle { font-size: 14px; margin: 10px 0 24px; }
+.teams-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 1fr); gap: 20px; align-items: start; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid .field-label, .season-form .field-label { margin: 0; }
+.form-grid .input, .season-form .input { display: block; width: 100%; margin-top: 7px; }
+.form-wide { grid-column: 1 / -1; }
+.form-grid .form-message, .season-form .form-message { margin: 0; align-self: center; }
+.season-list { display: grid; gap: 7px; margin-bottom: 18px; }
+.season-row { display: flex; justify-content: space-between; gap: 12px; padding: 11px 13px; border: 1px solid var(--line); border-radius: 9px; color: var(--forest); text-decoration: none; font-size: 13px; font-weight: 700; }
+.season-row:hover { background: #f4f7f2; }
+.season-form { display: flex; align-items: end; gap: 9px; flex-wrap: wrap; padding-top: 15px; border-top: 1px solid var(--line); }
+.season-form .field-label { flex: 1 1 100px; }
+.season-form .btn { min-height: 39px; }
+.season-chip a { color: #dce8e1; }
+.member-editors { display: grid; gap: 7px; }
+.member-editor { border: 1px solid var(--line); border-radius: 10px; }
+.member-editor summary { display: flex; justify-content: space-between; gap: 12px; cursor: pointer; padding: 11px 13px; font-size: 13px; font-weight: 700; }
+.member-editor summary span { color: var(--muted); font-size: 11px; font-weight: 400; }
+.member-editor .form-grid { border-top: 1px solid var(--line); padding: 14px; }
+.add-member { border-top: 1px solid var(--line); margin-top: 19px; padding-top: 18px; }
+.add-member h3 { font-size: 14px; margin: 0; }
 
 @media (max-width: 950px) {
+  .teams-grid { grid-template-columns: 1fr; }
   .shell { grid-template-columns: 76px minmax(0,1fr); }
   .sidebar { align-items: center; padding: 22px 10px; }
   .brand { padding: 0; }
@@ -138,6 +162,11 @@ h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -.055em; line-height: 
   .stack-side { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
 @media (max-width: 650px) {
+  .teams-top { margin-bottom: 34px; }
+  .teams-top .brand { display: flex; color: var(--forest); }
+  .teams-top .brand span:last-child { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-wide { grid-column: auto; }
   .shell { display: block; padding-bottom: 72px; }
   .sidebar { position: fixed; z-index: 5; bottom: 0; left: 0; right: 0; height: 64px; padding: 8px 16px; flex-direction: row; justify-content: space-around; gap: 5px; box-shadow: 0 -8px 24px #17261d0d; }
   .brand, .sidebar-spacer, .nav-label { display: none; }

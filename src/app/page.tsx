@@ -7,7 +7,6 @@ import { getSession } from "@/lib/auth";
 import { dateLabel } from "@/lib/dates";
 import { PushSetup } from "@/components/push-setup";
 import { RecurringAvailability } from "@/components/recurring-availability";
-import { MemberEmail } from "@/components/member-email";
 
 export const dynamic = "force-dynamic";
 
@@ -24,15 +23,16 @@ function dateParts(value: Date | null) {
   };
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: { searchParams: Promise<{ team?: string; season?: string }> }) {
   const session = await getSession();
   if (!session) redirect("/login");
+  const selected = await searchParams;
 
   if (!db) {
     return <SetupMessage title="Databasen mangler" detail="Forbind Neon og sæt DATABASE_URL for at åbne holdets sæson." />;
   }
 
-  const [access] = await db.select({
+  const accessRows = await db.select({
     role: teamAccess.role,
     teamId: teams.id,
     teamName: teams.name,
@@ -44,17 +44,18 @@ export default async function HomePage() {
   })
     .from(teamAccess)
     .innerJoin(teams, eq(teamAccess.teamId, teams.id))
-    .where(eq(teamAccess.userId, session.userId))
-    .limit(1);
+    .where(eq(teamAccess.userId, session.userId));
+  const access = accessRows.find((row) => row.teamId === selected.team) ?? accessRows[0];
 
   if (!access) {
     return <SetupMessage title="Du mangler holdadgang" detail="Når kaptajnen har tilføjet din e-mail til holdets spillerliste, får du adgang til sæsonen her." email={session.email} />;
   }
 
-  const [season] = await db.select().from(seasons)
+  const seasonRows = await db.select().from(seasons)
     .where(eq(seasons.teamId, access.teamId))
-    .orderBy(desc(seasons.year))
-    .limit(1);
+    .orderBy(desc(seasons.year), desc(seasons.name));
+  const season = seasonRows.find((row) => row.id === selected.season) ?? seasonRows[0];
+  const overviewHref = season ? `/?team=${access.teamId}&season=${season.id}` : `/?team=${access.teamId}`;
   const matchRows = season
     ? await db.select().from(fixtures)
       .where(eq(fixtures.seasonId, season.id))
@@ -76,13 +77,14 @@ export default async function HomePage() {
         <div className="brand"><span className="brand-mark">L</span><span className="brand-name">Lunar Holdmanager</span></div>
         <div style={{ width: "100%" }}>
           <p className="nav-label">Hold</p>
-          <Link className="nav-link active" href="/"><span>⌂</span><span className="nav-text">Overblik</span></Link>
+          <Link className="nav-link active" href={overviewHref}><span>⌂</span><span className="nav-text">Overblik</span></Link>
           <a className="nav-link" href="#kampe"><span>▦</span><span className="nav-text">Kampe</span></a>
           <a className="nav-link" href="#spillere"><span>♙</span><span className="nav-text">Spillere</span></a>
           <a className="nav-link" href="#indstillinger"><span>⚙</span><span className="nav-text">Indstillinger</span></a>
+          <Link className="nav-link" href="/teams"><span>♟</span><span className="nav-text">Hold</span></Link>
         </div>
         <div className="sidebar-spacer" />
-        <div className="season-chip"><strong>{season?.name ?? "Sæson"} {season?.year ?? ""}</strong><br />{access.pool}<br />RankedIn ID: {access.rankedInId}</div>
+        <div className="season-chip"><strong>{season?.name ?? "Sæson"} {season?.year ?? ""}</strong><br />{access.pool}<br />{access.rankedInId.startsWith("local:") ? "Lokalt hold" : `RankedIn ID: ${access.rankedInId}`}<br /><Link href="/teams">Skift hold eller sæson →</Link></div>
       </aside>
 
       <main className="main">
@@ -101,14 +103,14 @@ export default async function HomePage() {
             <h1>Hej, holdet 👋</h1>
             <p>{nextMatch ? `Næste kamp: ${nextMatch.opponent} · ${dateLabel(nextMatch.scheduledAt)}` : "Du er ajour med sæsonen."}</p>
           </div>
-          <Link className="btn btn-primary" href={access.rankedInUrl} target="_blank" rel="noreferrer">Åbn holdet i RankedIn ↗</Link>
+          {access.rankedInUrl && <Link className="btn btn-primary" href={access.rankedInUrl} target="_blank" rel="noreferrer">Åbn holdet i RankedIn ↗</Link>}
         </div>
 
         <div className="grid">
           <div className="stack">
             <section className="card" id="kampe">
               <div className="card-head">
-                <div><h2 className="card-title">Kommende kampe</h2><p className="card-subtitle">Datoer og praktiske detaljer fra RankedIn</p></div>
+                <div><h2 className="card-title">Kommende kampe</h2><p className="card-subtitle">{access.rankedInUrl ? "Datoer og praktiske detaljer fra RankedIn" : "Holdets kampe i denne sæson"}</p></div>
                 <span className="badge"><span className="badge-dot" />{upcoming.length} på programmet</span>
               </div>
               {upcoming.length ? upcoming.map((match) => {
@@ -118,7 +120,7 @@ export default async function HomePage() {
                   <article className="fixture" key={match.id}>
                     <div className="fixture-date"><div className="fixture-day">{date.day}</div><div className="fixture-month">{date.month}</div></div>
                     <div>
-                      <div className="fixture-title">{home ? "Piranha Padel" : match.opponent} <span style={{ color: "#9da8a1", fontWeight: 400 }}>mod</span> {home ? match.opponent : "Piranha Padel"}</div>
+                      <div className="fixture-title">{home ? access.teamName : match.opponent} <span style={{ color: "#9da8a1", fontWeight: 400 }}>mod</span> {home ? match.opponent : access.teamName}</div>
                       <div className="fixture-meta">
                         <span>◷ {match.scheduledAt ? new Intl.DateTimeFormat("da-DK", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Copenhagen" }).format(match.scheduledAt) : "Tid aftales"}</span>
                         <span>⌖ {match.address ?? access.homeAddress}</span>
@@ -151,22 +153,22 @@ export default async function HomePage() {
                 <span>{new Intl.DateTimeFormat("da-DK", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Copenhagen" }).format(notification.createdAt)}</span>
               </div>)}
             </section>}
-            <RecurringAvailability />
+            <RecurringAvailability teamId={access.teamId} />
           </div>
 
           <div className="stack stack-side">
             {pendingResults.length > 0 && <section className="card warning-card"><strong>Resultat mangler</strong><br />Kontrollér, om {pendingResults.map((match) => match.opponent).join(", ")} er registreret i RankedIn.<div style={{ marginTop: 9 }}><Link className="text-link" href={`/matches/${pendingResults[0].id}`}>Åbn kampen →</Link></div></section>}
             <section className="card" id="spillere">
               <div className="card-head"><div><h2 className="card-title">Truppen</h2><p className="card-subtitle">Spillere og intern rangorden</p></div><span className="badge">{members.length} spillere</span></div>
+              {["owner", "captain"].includes(access.role) && <Link className="text-link" href={`/teams/${access.teamId}`}>Rediger hold og spillere →</Link>}
               <div className="member-list">
                 {members.map((member) => (
                   <div key={member.id}>
                     <div className="member">
                       <span className="member-initials">{initials(member.name)}</span>
-                      <span className="member-name">{member.name}{member.role === "captain" && <span className="captain-tag">Kaptajn</span>}</span>
+                      <span className="member-name">{member.name}{member.role === "captain" && <span className="captain-tag">Kaptajn</span>}{member.role === "vice_captain" && <span className="captain-tag">Stedfortræder</span>}</span>
                       <span className="member-rank">{member.rank ?? "—"}</span>
                     </div>
-                  {(["owner", "captain"].includes(access.role)) && <MemberEmail memberId={member.id} initialEmail={member.email} />}
                   </div>
                 ))}
               </div>
@@ -174,9 +176,9 @@ export default async function HomePage() {
             </section>
 
             <section className="card">
-              <div className="card-head"><div><h2 className="card-title">Hjemmebane</h2><p className="card-subtitle">Piranha Padel</p></div></div>
-              <div className="venue-line"><span className="venue-icon">⌖</span><div><div className="venue-name">{access.homeVenue}</div><div className="venue-address">{access.homeAddress}</div></div></div>
-              <a className="text-link" href={`https://maps.google.com/?q=${encodeURIComponent(access.homeAddress)}`} target="_blank" rel="noreferrer">Vis på kort ↗</a>
+              <div className="card-head"><div><h2 className="card-title">Hjemmebane</h2><p className="card-subtitle">{access.teamName}</p></div></div>
+              {access.homeVenue || access.homeAddress ? <div className="venue-line"><span className="venue-icon">⌖</span><div><div className="venue-name">{access.homeVenue}</div><div className="venue-address">{access.homeAddress}</div></div></div> : <p className="card-subtitle">Hjemmebane er ikke angivet endnu.</p>}
+              {access.homeAddress && <a className="text-link" href={`https://maps.google.com/?q=${encodeURIComponent(access.homeAddress)}`} target="_blank" rel="noreferrer">Vis på kort ↗</a>}
             </section>
 
             {access.role === "owner" || access.role === "captain" ? (
