@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import type { PushSubscription } from "web-push";
 
 export const users = pgTable(
   "users",
@@ -142,7 +143,7 @@ export const pushSubscriptions = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
     endpoint: text("endpoint").notNull(),
-    subscription: jsonb("subscription").$type<Record<string, unknown>>().notNull(),
+    subscription: jsonb("subscription").$type<PushSubscription>().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [uniqueIndex("push_endpoint_unique").on(table.endpoint)],
