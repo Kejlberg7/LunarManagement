@@ -82,6 +82,8 @@ h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -.055em; line-height: 
 .input { width: 100%; border: 1px solid #dce3dc; border-radius: 10px; padding: 13px 14px; outline: none; }
 .input:focus { border-color: #668c77; box-shadow: 0 0 0 3px #6d9a7a20; }
 .login-box .btn { width: 100%; margin-top: 13px; padding: 14px; }
+.login-mode-link { display: block; margin: 16px auto 0; border: 0; padding: 4px; background: transparent; color: #426e5f; font-size: 12px; font-weight: 700; cursor: pointer; }
+.login-mode-link:hover { text-decoration: underline; }
 .form-message { margin-top: 14px; padding: 12px; border-radius: 9px; background: #edf5e9; color: #335736; font-size: 12px; line-height: 1.5; }
 .form-error { background: #fbefed; color: #8e3e36; }
 .dev-link { display: inline-block; margin-top: 10px; color: #315d4e; font-size: 12px; font-weight: 700; }

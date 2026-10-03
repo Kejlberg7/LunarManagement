@@ -4,10 +4,12 @@ import { FormEvent, useState } from "react";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loginUrl, setLoginUrl] = useState("");
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -16,18 +18,22 @@ export function LoginForm() {
     setMessage("");
     setLoginUrl("");
     try {
-      const response = await fetch("/api/auth/request", {
+      const response = await fetch(resetMode ? "/api/auth/request" : "/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(resetMode ? { email } : { email, password }),
       });
-      const data = (await response.json()) as { message?: string; error?: string; developmentUrl?: string };
+      const data = (await response.json()) as { message?: string; error?: string; developmentUrl?: string; redirectTo?: string };
       if (!response.ok) throw new Error(data.error ?? "Noget gik galt.");
-      setMessage(data.message ?? "Tjek din indbakke efter et login-link.");
+      if (data.redirectTo) {
+        window.location.assign(data.redirectTo);
+        return;
+      }
+      setMessage(data.message ?? "Tjek din indbakke efter et link til at vælge adgangskode.");
       if (data.developmentUrl) setLoginUrl(data.developmentUrl);
     } catch (err) {
       setError(true);
-      setMessage(err instanceof Error ? err.message : "Login-linket kunne ikke sendes.");
+      setMessage(err instanceof Error ? err.message : "Login kunne ikke gennemføres.");
     } finally {
       setBusy(false);
     }
@@ -46,11 +52,31 @@ export function LoginForm() {
         value={email}
         onChange={(event) => setEmail(event.target.value)}
       />
+      {!resetMode && <>
+        <label className="field-label" htmlFor="password">Adgangskode</label>
+        <input
+          className="input"
+          id="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+        />
+      </>}
       <button className="btn btn-primary" disabled={busy} type="submit">
-        {busy ? "Sender link …" : "Send mig et login-link"}
+        {busy ? (resetMode ? "Sender link …" : "Logger ind …") : (resetMode ? "Send link til adgangskode" : "Log ind")}
       </button>
       {message && <div className={`form-message${error ? " form-error" : ""}`} role="status">{message}</div>}
       {loginUrl && <a className="dev-link" href={loginUrl}>Fortsæt til din lokale login-side ↗</a>}
+      <button className="login-mode-link" type="button" onClick={() => {
+        setResetMode(!resetMode);
+        setMessage("");
+        setError(false);
+        setLoginUrl("");
+      }}>
+        {resetMode ? "Tilbage til login" : "Første gang eller glemt adgangskode?"}
+      </button>
     </form>
   );
 }
