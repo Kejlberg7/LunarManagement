@@ -32,7 +32,7 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Lunar Holdmanager//DA", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",
     `UID:${id}@lunar-management.vercel.app`, `DTSTAMP:${stamp(new Date())}`, `DTSTART:${stamp(match.scheduledAt)}`,
     `DTEND:${stamp(new Date(match.scheduledAt.getTime() + 2 * 60 * 60 * 1000))}`, `SUMMARY:${escape(title)}`,
-    `LOCATION:${escape(match.address || match.venue || match.homeAddress || "")}`, `DESCRIPTION:${escape(details.join("\n"))}`,
+    `LOCATION:${escape(match.address || match.venue || (match.homeAway === "home" ? match.homeAddress : "") || "")}`, `DESCRIPTION:${escape(details.join("\n"))}`,
     "END:VEVENT", "END:VCALENDAR", ""];
   return new Response(lines.join("\r\n"), { headers: {
     "Content-Type": "text/calendar; charset=utf-8",

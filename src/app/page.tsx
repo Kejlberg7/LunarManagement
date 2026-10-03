@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { fixtures, notifications, seasons, teamAccess, teamMembers, teams } from "@/db/schema";
 import { getSession } from "@/lib/auth";
@@ -70,6 +70,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const completed = matchRows.filter((match) => match.status === "completed").length;
   const recentNotifications = await db.select().from(notifications)
     .where(eq(notifications.userId, session.userId)).orderBy(desc(notifications.createdAt)).limit(5);
+  const [unread] = await db.select({ total: sql<number>`count(*)::int` }).from(notifications)
+    .where(and(eq(notifications.userId, session.userId), isNull(notifications.readAt)));
   const nextMatch = upcoming[0];
 
   return (
@@ -83,6 +85,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <a className="nav-link" href="#spillere"><span>♙</span><span className="nav-text">Spillere</span></a>
           <a className="nav-link" href="#indstillinger"><span>⚙</span><span className="nav-text">Indstillinger</span></a>
           <Link className="nav-link" href="/teams"><span>♟</span><span className="nav-text">Hold</span></Link>
+          <Link className="nav-link" href="/notifications"><span>♧</span><span className="nav-text">Beskeder{unread.total ? ` (${unread.total})` : ""}</span></Link>
         </div>
         <div className="sidebar-spacer" />
         <div className="season-chip"><strong>{season?.name ?? "Sæson"} {season?.year ?? ""}</strong><br />{access.pool}<br />{access.rankedInId.startsWith("local:") ? "Lokalt hold" : `RankedIn ID: ${access.rankedInId}`}<br /><Link href="/teams">Skift hold eller sæson →</Link></div>
@@ -124,7 +127,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       <div className="fixture-title">{home ? access.teamName : match.opponent} <span style={{ color: "#9da8a1", fontWeight: 400 }}>mod</span> {home ? match.opponent : access.teamName}</div>
                       <div className="fixture-meta">
                         <span>◷ {match.scheduledAt ? new Intl.DateTimeFormat("da-DK", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Copenhagen" }).format(match.scheduledAt) : "Tid aftales"}</span>
-                        <span>⌖ {match.address ?? access.homeAddress}</span>
+                        <span>⌖ {match.address ?? (home ? access.homeAddress : "Sted aftales")}</span>
                       </div>
                     </div>
                     <div className="fixture-action">
@@ -147,7 +150,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <p className="card-subtitle" style={{ marginTop: 12 }}>På iPhone: føj først Lunar Holdmanager til hjemmeskærmen. Du kan altid følge nye beskeder inde i appen.</p>
             </section>
             {recentNotifications.length > 0 && <section className="card">
-              <div className="card-head"><div><h2 className="card-title">Nyt på holdet</h2><p className="card-subtitle">Notifikationer i appen</p></div></div>
+              <div className="card-head"><div><h2 className="card-title">Nyt på holdet</h2><p className="card-subtitle">Notifikationer i appen</p></div><Link className="text-link" href="/notifications">Alle beskeder →</Link></div>
               {recentNotifications.map((notification) => <div className="notice-row" key={notification.id}>
                 <Link href={notification.href} className="notice-title">{notification.title}</Link>
                 <p>{notification.body}</p>

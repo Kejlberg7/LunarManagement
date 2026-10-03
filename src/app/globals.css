@@ -127,6 +127,9 @@ h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -.055em; line-height: 
 .notice-title { color: var(--ink); font-size: 12px; font-weight: 700; text-decoration: none; }
 .notice-row p { color: var(--muted); font-size: 12px; margin: 5px 0; }
 .notice-row span { color: #98a39b; font-size: 10px; }
+.notice-unread { background: #f6faef; margin: 0 -10px; padding: 12px 10px; border-radius: 9px; }
+.notice-header { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.notice-read { border: 0; background: transparent; cursor: pointer; padding: 0; }
 .teams-page { max-width: 1400px; margin: 0 auto; }
 .teams-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 48px; }
 .teams-page > .card-subtitle { font-size: 14px; margin: 10px 0 24px; }

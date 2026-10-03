@@ -93,7 +93,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         <header className="topbar"><Link className="text-link" href={overviewHref}>← Tilbage til overblik</Link><span className="badge">{match.pool}</span></header>
         <div className="eyebrow">{match.teamName} · {home ? "Hjemmekamp" : "Udekamp"}</div>
         <h1>{home ? `${match.teamName} mod ${match.opponent}` : `${match.opponent} mod ${match.teamName}`}</h1>
-        <p className="match-lead">{dateLabel(match.scheduledAt)} · {match.address ?? match.homeAddress}</p>
+        <p className="match-lead">{dateLabel(match.scheduledAt)} · {match.address ?? (home ? match.homeAddress : "Sted aftales")}</p>
         <div className="match-layout">
           <div className="stack">
             <PollTools matchId={match.id} options={pollOptions} deadline={match.responseDeadline?.toISOString() ?? null} canManage={["owner", "captain"].includes(access.role)} canRespond={Boolean(member)} />
@@ -101,7 +101,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
             <section className="card">
               <div className="card-head"><div><h2 className="card-title">Kampinformation</h2><p className="card-subtitle">{match.sourceType === "rankedin_public" ? "Læst fra RankedIn til piloten" : match.sourceType === "csv" ? "Importeret fra CSV" : "Oprettet i holdappen"}{match.sourceUpdatedAt ? ` · ${new Intl.DateTimeFormat("da-DK", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Copenhagen" }).format(match.sourceUpdatedAt)}` : ""}</p></div></div>
               <div className="info-row"><span>Kamp</span><strong>{home ? "Hjemme" : "Ude"} mod {match.opponent}</strong></div>
-              <div className="info-row"><span>Spillested</span><strong>{match.venue ?? match.address ?? match.homeAddress}</strong></div>
+              <div className="info-row"><span>Spillested</span><strong>{match.venue ?? match.address ?? (home ? match.homeAddress : "Sted aftales")}</strong></div>
               <div className="info-row"><span>Status</span><strong>{match.result ? `Afsluttet · ${match.result}` : "Planlagt"}</strong></div>
               {match.opponentContactName && <div className="info-row"><span>Modstanderens kontakt</span><strong>{match.opponentContactName}</strong></div>}
               {match.opponentContactPhone && <div className="info-row"><span>Telefon</span><a href={`tel:${match.opponentContactPhone}`}>{match.opponentContactPhone}</a></div>}
