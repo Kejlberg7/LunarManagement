@@ -141,6 +141,13 @@ export const availabilityResponses = pgTable(
   (table) => [primaryKey({ columns: [table.optionId, table.memberId] })],
 );
 
+export const fixtureSelections = pgTable("fixture_selections", {
+  fixtureId: uuid("fixture_id").references(() => fixtures.id, { onDelete: "cascade" }).notNull(),
+  memberId: uuid("member_id").references(() => teamMembers.id, { onDelete: "cascade" }).notNull(),
+  status: text("status").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => [primaryKey({ columns: [table.fixtureId, table.memberId] })]);
+
 export const pushSubscriptions = pgTable(
   "push_subscriptions",
   {

@@ -2,11 +2,12 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { availabilityOptions, availabilityResponses, fixtures, seasons, teamAccess, teamMembers, teams } from "@/db/schema";
+import { availabilityOptions, availabilityResponses, fixtureSelections, fixtures, seasons, teamAccess, teamMembers, teams } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { dateLabel } from "@/lib/dates";
 import { PollTools } from "@/components/poll-tools";
 import { EditFixtureForm } from "@/components/fixture-forms";
+import { SquadPlanner } from "@/components/squad-planner";
 
 export const dynamic = "force-dynamic";
 
@@ -57,8 +58,10 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   }).from(availabilityResponses)
     .innerJoin(teamMembers, eq(availabilityResponses.memberId, teamMembers.id))
     .where(eq(teamMembers.teamId, match.teamId)) : [];
-  const members = await db.select({ id: teamMembers.id, name: teamMembers.name }).from(teamMembers)
+  const members = await db.select({ id: teamMembers.id, name: teamMembers.name, rank: teamMembers.rank }).from(teamMembers)
     .where(eq(teamMembers.teamId, match.teamId)).orderBy(asc(teamMembers.rank));
+  const selections = await db.select({ memberId: fixtureSelections.memberId, status: fixtureSelections.status })
+    .from(fixtureSelections).where(eq(fixtureSelections.fixtureId, match.id));
 
   const pollOptions = options.map((option) => {
     const matching = responses.filter((response) => response.optionId === option.id);
@@ -91,6 +94,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         <div className="match-layout">
           <div className="stack">
             <PollTools matchId={match.id} options={pollOptions} deadline={match.responseDeadline?.toISOString() ?? null} canManage={["owner", "captain"].includes(access.role)} canRespond={Boolean(member)} />
+            <SquadPlanner matchId={match.id} members={members.map((person) => ({ ...person, status: selections.find((row) => row.memberId === person.id)?.status ?? null }))} canManage={["owner", "captain"].includes(access.role)} />
             <section className="card">
               <div className="card-head"><div><h2 className="card-title">Kampinformation</h2><p className="card-subtitle">{match.sourceType === "rankedin_public" ? "Læst fra RankedIn til piloten" : match.sourceType === "csv" ? "Importeret fra CSV" : "Oprettet i holdappen"}{match.sourceUpdatedAt ? ` · ${new Intl.DateTimeFormat("da-DK", { day: "numeric", month: "short", year: "numeric", timeZone: "Europe/Copenhagen" }).format(match.sourceUpdatedAt)}` : ""}</p></div></div>
               <div className="info-row"><span>Kamp</span><strong>{home ? "Hjemme" : "Ude"} mod {match.opponent}</strong></div>
