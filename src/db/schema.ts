@@ -101,6 +101,7 @@ export const fixtures = pgTable(
     rankedInMatchId: text("rankedin_match_id"),
     status: text("status").default("scheduled").notNull(),
     result: text("result"),
+    sourceType: text("source_type").default("manual").notNull(),
     sourceUpdatedAt: timestamp("source_updated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },

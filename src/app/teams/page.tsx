@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { seasons, teamAccess, teams } from "@/db/schema";
 import { getSession } from "@/lib/auth";
@@ -15,12 +15,13 @@ export default async function TeamsPage() {
   const access = await db.select({
     id: teams.id, name: teams.name, pool: teams.pool, role: teamAccess.role,
   }).from(teamAccess).innerJoin(teams, eq(teamAccess.teamId, teams.id))
-    .where(eq(teamAccess.userId, session.userId));
+    .where(eq(teamAccess.userId, session.userId))
+    .orderBy(asc(teamAccess.createdAt), asc(teams.name));
   const teamSeasons = await Promise.all(access.map(async (team) => ({
     ...team,
     seasons: await db!.select({ id: seasons.id, name: seasons.name, year: seasons.year })
       .from(seasons).where(eq(seasons.teamId, team.id))
-      .orderBy(desc(seasons.year), desc(seasons.name)),
+      .orderBy(desc(seasons.year), desc(sql`case when lower(${seasons.name}) = 'efterår' then 2 when lower(${seasons.name}) = 'forår' then 1 else 0 end`), desc(seasons.name)),
   })));
 
   return <main className="setup-wrap teams-page">

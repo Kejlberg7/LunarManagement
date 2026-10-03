@@ -150,6 +150,11 @@ h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -.055em; line-height: 
 .member-editor .form-grid { border-top: 1px solid var(--line); padding: 14px; }
 .add-member { border-top: 1px solid var(--line); margin-top: 19px; padding-top: 18px; }
 .add-member h3 { font-size: 14px; margin: 0; }
+.card-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: end; }
+.form-submit { margin-top: 16px; }
+.csv-file { width: 100%; margin: 15px 0; padding: 9px; }
+.csv-textarea { display: block; width: 100%; min-height: 180px; margin-top: 7px; resize: vertical; line-height: 1.5; }
+.season-row small { display: inline-block; color: var(--muted); font-weight: 400; margin-top: 4px; }
 
 @media (max-width: 950px) {
   .teams-grid { grid-template-columns: 1fr; }

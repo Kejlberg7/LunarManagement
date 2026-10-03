@@ -88,6 +88,7 @@ try {
       rankedInUrl: `https://www.rankedin.com/en/team/matchresults/${match.id}`,
       status: match.result ? "completed" : "scheduled",
       result: match.result,
+      sourceType: "rankedin_public",
       sourceUpdatedAt: new Date("2026-10-03T12:00:00Z"),
     }).onConflictDoUpdate({
       target: schema.fixtures.rankedInMatchId,
@@ -98,6 +99,7 @@ try {
         address: match.address,
         status: match.result ? "completed" : "scheduled",
         result: match.result,
+        sourceType: "rankedin_public",
         sourceUpdatedAt: new Date("2026-10-03T12:00:00Z"),
       },
     });

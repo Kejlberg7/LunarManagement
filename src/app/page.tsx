@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { fixtures, notifications, seasons, teamAccess, teamMembers, teams } from "@/db/schema";
 import { getSession } from "@/lib/auth";
@@ -44,7 +44,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   })
     .from(teamAccess)
     .innerJoin(teams, eq(teamAccess.teamId, teams.id))
-    .where(eq(teamAccess.userId, session.userId));
+    .where(eq(teamAccess.userId, session.userId))
+    .orderBy(asc(teamAccess.createdAt), asc(teams.name));
   const access = accessRows.find((row) => row.teamId === selected.team) ?? accessRows[0];
 
   if (!access) {
@@ -53,7 +54,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   const seasonRows = await db.select().from(seasons)
     .where(eq(seasons.teamId, access.teamId))
-    .orderBy(desc(seasons.year), desc(seasons.name));
+    .orderBy(desc(seasons.year), desc(sql`case when lower(${seasons.name}) = 'efterår' then 2 when lower(${seasons.name}) = 'forår' then 1 else 0 end`), desc(seasons.name));
   const season = seasonRows.find((row) => row.id === selected.season) ?? seasonRows[0];
   const overviewHref = season ? `/?team=${access.teamId}&season=${season.id}` : `/?team=${access.teamId}`;
   const matchRows = season
@@ -111,7 +112,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <section className="card" id="kampe">
               <div className="card-head">
                 <div><h2 className="card-title">Kommende kampe</h2><p className="card-subtitle">{access.rankedInUrl ? "Datoer og praktiske detaljer fra RankedIn" : "Holdets kampe i denne sæson"}</p></div>
-                <span className="badge"><span className="badge-dot" />{upcoming.length} på programmet</span>
+                <div className="card-actions"><span className="badge"><span className="badge-dot" />{upcoming.length} på programmet</span>{season && <Link className="text-link" href={`/seasons/${season.id}/fixtures`}>Alle kampe →</Link>}</div>
               </div>
               {upcoming.length ? upcoming.map((match) => {
                 const date = dateParts(match.scheduledAt);
