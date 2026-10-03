@@ -1,5 +1,13 @@
 # LunarManagement — produktplan
 
+## Status 3. oktober 2026
+
+- Login med e-mail alene, holdadgang, pilotdata, hold- og sæsonstyring er i produktion.
+- Kampoprettelse, CSV-import, redigering, resultatfelt, kampkort, datoafstemning med svarfrist, spillerstatus, seksmands-trup og reserver er i produktion. Disse flow er gennemgået i browseren på en særskilt lokal testdatabase, og de udsendte sider er kontrolleret i produktion.
+- Modstanderkontakt, kortlink, kalenderfil og indbakke med læst/ulæst er i produktion og gennemgået i browseren.
+- Daglige kamp- og svarfristpåmindelser er implementeret og testet lokalt, inklusive adgangskontrol og beskyttelse mod dubletter. Produktion afventer `CRON_SECRET` i Vercel og efterfølgende udrulning.
+- Endnu ikke færdigt: brug af faste ugentlige tider i datoafstemningens forslag, egentlig runde-/doubleopstilling, deling med modstander, sæsonoverblik over åbne afstemninger og frister, verificeret telefonpush på fysisk enhed samt automatisk RankedIn-læsning. De officielle RankedIn-oplysninger bliver fortsat manuelt vedligeholdt eller importeret via CSV.
+
 ## Produktidé
 
 En enkel holdapp til Lunar Ligaen, der samler sæsonens praktiske koordinering ét sted. Kaptajnen får styr på datoer, fremmøde og holdopstilling; spillerne kan hurtigt se, hvornår og hvor næste kamp er, hvem der deltager, og hvad de selv skal svare på.
