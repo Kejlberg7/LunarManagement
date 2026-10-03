@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { LoginForm } from "@/components/login-form";
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const { error } = await searchParams;
+export default function LoginPage() {
   return (
     <main className="login-wrap">
       <section className="login-aside">
@@ -17,11 +16,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <section className="login-panel">
         <div className="login-box">
           <div className="mobile-brand brand"><span className="brand-mark">L</span><span>Lunar Holdmanager</span></div>
-          <h2>Log ind</h2>
-          <p>Brug din e-mail og adgangskode for at åbne Lunar Holdmanager.</p>
-          {error === "expired" && <div className="form-message form-error">Linket er udløbet eller allerede brugt. Bed om et nyt link til adgangskode.</div>}
+          <h2>Fortsæt med e-mail</h2>
+          <p>Skriv den e-mail, kaptajnen har tilføjet til holdet, så åbner appen.</p>
           <LoginForm />
-          <p style={{ marginTop: 20, fontSize: 11 }}>Første gang skal du bekræfte din e-mail og vælge en adgangskode. Linket virker én gang.</p>
+          <p style={{ marginTop: 20, fontSize: 11 }}>Ingen adgangskode eller loginmail. Brug din egen e-mail, så dine svar registreres på dig.</p>
           <Link className="text-link" href="/">Til forsiden</Link>
         </div>
       </section>

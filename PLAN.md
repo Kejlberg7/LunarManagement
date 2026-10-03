@@ -33,7 +33,7 @@ DPF administrerer turneringen og udpeger den turneringsansvarlige. RankedIn brug
 
 ### Spiller
 
-- Log ind med et sikkert link sendt til spillerens e-mailadresse. Appen kan tilbyde at blive føjet til telefonens hjemmeskærm.
+- Skriv spillerens e-mail for direkte adgang. Kaptajnen skal have tilføjet adressen på holdlisten. Appen kan føjes til telefonens hjemmeskærm.
 - Svar hurtigt på datoforslag og se svarfrist.
 - Angiv faste ugentlige tider én gang, og ret dem for den enkelte kamp efter behov.
 - Se bekræftet kampdato, modstander, sted/kort, valgt trup, makkere og praktiske beskeder.
@@ -46,7 +46,7 @@ DPF administrerer turneringen og udpeger den turneringsansvarlige. RankedIn brug
 2. **Kampprogram:** Manuel oprettelse og CSV-import af kampe med Rankedin-link, modstander, hjemme/ude og officiel dato.
 3. **Tilgængelighedsafstemning:** Kaptajnen foreslår flere tidspunkter; spillere markerer deres tilgængelighed og frist. Vis svarstatus og samlet antal tilgængelige.
 4. **Kampkort:** Én side pr. kamp med afstemning, sted, kontakt, holdstatus og aftalte detaljer.
-5. **Trup og påmindelser:** Bekræft deltagere/reserver og vis tydeligt, når færre end seks kan. Send pushnotifikationer til telefoner, hvor spilleren har installeret appen på hjemmeskærmen og givet tilladelse. E-mail bruges til login-link, ikke kampreminders.
+5. **Trup og påmindelser:** Bekræft deltagere/reserver og vis tydeligt, når færre end seks kan. Send pushnotifikationer til telefoner, hvor spilleren har installeret appen på hjemmeskærmen og givet tilladelse. E-mail bruges ikke til login eller kampreminders.
 6. **Sæsonoversigt:** Kommende kampe, åbne afstemninger, svarfrister, resultater og links til officielle RankedIn-sider.
 7. **Mobilvenlig og privat:** Designet til telefon. Spillere kan kun se deres eget hold via login. Push kræver brugerens tilladelse; på iPhone/iPad skal webappen tilføjes til hjemmeskærmen. Vis også notifikationer inde i appen, så beskeder ikke kun afhænger af push.
 
@@ -56,7 +56,7 @@ Første version bør undgå ranglisteautomatik, fuld divisionsadministration, be
 
 Løsningen bygges som en installerbar PWA med Web Push, så den kan sende notifikationer uden en native iOS-/Android-app. På iPhone og iPad understøtter Apple push for webapps, som er føjet til hjemmeskærmen (iOS/iPadOS 16.4 eller nyere); brugeren skal selv give notifikationstilladelse. Derfor skal onboarding forklare installationen og tilbyde notifikationer inde i appen som fallback. [Apple: Web Push i webapps og browsere](https://developer.apple.com/documentation/usernotifications/sending-web-push-notifications-in-web-apps-and-browsers)
 
-Push kan bruges til ny datoafstemning, svarfrist, ændret kampplan og bekræftet trup. E-mail-login-link er fortsat en separat funktion til adgangskontrol; ingen kampreminders sendes på e-mail.
+Push kan bruges til ny datoafstemning, svarfrist, ændret kampplan og bekræftet trup. Login kræver kun e-mailadressen på holdlisten; enheden får en 30-dages session.
 
 ## Pilot: Piranha Padel
 
@@ -125,18 +125,18 @@ Brug samme grundmønster som de nyere apps:
 - Vercel-projekt forbundet til GitHub-repoet, deploy ved push til `main`
 - Neon Postgres som database og Drizzle ORM til skema/migrationer
 - `DATABASE_URL` fra Neon i Vercel Production og lokal `.env.local`
-- Server-side sessions/invitationer; ingen hemmeligheder eller RankedIn API-nøgle i browseren
+- Server-side sessions; adgang kræver en adresse på spillerlisten eller pilotens adminmail
 - Vercel- og Neon-projektet er oprettet under `kejlberg7@gmail.com`; appen er deployet på `https://lunar-management.vercel.app`
-- Neon-skema og pilotdata for Piranha Padel er oprettet. Login-link kræver stadig en SMTP-afsender, før kaptajn og spillere kan logge ind i produktion.
+- Neon-skema og pilotdata for Piranha Padel er oprettet. Spillere logger ind med e-mailadressen på holdlisten uden adgangskode.
 
 ## Aftalte produktvalg og resterende afklaring
 
-- Login: sikkert engangslink sendt til brugerens e-mail.
+- Login: e-mail alene, uden bekræftelse; kun adresser på holdlisten eller pilotens adminmail får adgang.
 - Tilgængelighed: både faste ugentlige tidsrum og særskilt svar for hver kamp.
-- Påmindelser: push direkte til telefonen samt en indbakke i appen. E-mail er kun til login.
+- Påmindelser: push direkte til telefonen samt en indbakke i appen. E-mail bruges ikke af loginflowet.
 - Pilot: Piranha Padel, RankedIn ID `T003281428`, Lunar Ligaen efterår 2026.
 - RankedIn: prøv den officielle Public API først, hvis brugerens/klubbens nøgle er tilgængelig og har rettigheder. Ellers pilotimport fra offentlig side/CSV efter kontrol af vilkår.
-- Stadig uafklaret: hvilken SMTP-afsender skal sende login-links, og hvilke kampdata tillader RankedIn at hente automatisk?
+- Stadig uafklaret: hvilke kampdata tillader RankedIn at hente automatisk?
 
 ## Kilder
 
