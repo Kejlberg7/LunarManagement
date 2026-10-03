@@ -1,6 +1,7 @@
 export type FixtureInput = {
   opponent?: string; homeAway?: string; scheduledAt?: string | null;
   venue?: string; address?: string; rankedInUrl?: string; rankedInMatchId?: string;
+  opponentContactName?: string; opponentContactEmail?: string; opponentContactPhone?: string;
   result?: string; status?: string;
 };
 
@@ -39,6 +40,11 @@ export function normalizeFixture(raw: FixtureInput) {
   const address = raw.address?.trim() ?? "";
   const rankedInUrl = raw.rankedInUrl?.trim() ?? "";
   const result = raw.result?.trim() ?? "";
+  const opponentContactName = raw.opponentContactName?.trim() ?? "";
+  const opponentContactEmail = raw.opponentContactEmail?.trim().toLowerCase() ?? "";
+  const opponentContactPhone = raw.opponentContactPhone?.trim() ?? "";
+  if (opponentContactName.length > 150 || opponentContactEmail.length > 254 || opponentContactPhone.length > 50) throw new Error("Modstanderens kontakt er for lang.");
+  if (opponentContactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(opponentContactEmail)) throw new Error("Modstanderens e-mail er ugyldig.");
   if (venue.length > 200 || address.length > 300 || result.length > 50) throw new Error("Et af kampens felter er for langt.");
   if (rankedInUrl) {
     try {
@@ -53,6 +59,9 @@ export function normalizeFixture(raw: FixtureInput) {
     opponent, homeAway: homeAway === "home" || homeAway === "hjemme" ? "home" : "away",
     scheduledAt, venue: venue || null, address: address || null,
     rankedInUrl: rankedInUrl || null, rankedInMatchId,
+    opponentContactName: opponentContactName || null,
+    opponentContactEmail: opponentContactEmail || null,
+    opponentContactPhone: opponentContactPhone || null,
     status, result: result || null,
   };
 }

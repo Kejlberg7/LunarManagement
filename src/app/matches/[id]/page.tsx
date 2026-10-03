@@ -23,6 +23,9 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     scheduledAt: fixtures.scheduledAt,
     venue: fixtures.venue,
     address: fixtures.address,
+    opponentContactName: fixtures.opponentContactName,
+    opponentContactEmail: fixtures.opponentContactEmail,
+    opponentContactPhone: fixtures.opponentContactPhone,
     result: fixtures.result,
     responseDeadline: fixtures.responseDeadline,
     confirmedOptionId: fixtures.confirmedOptionId,
@@ -100,6 +103,11 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
               <div className="info-row"><span>Kamp</span><strong>{home ? "Hjemme" : "Ude"} mod {match.opponent}</strong></div>
               <div className="info-row"><span>Spillested</span><strong>{match.venue ?? match.address ?? match.homeAddress}</strong></div>
               <div className="info-row"><span>Status</span><strong>{match.result ? `Afsluttet · ${match.result}` : "Planlagt"}</strong></div>
+              {match.opponentContactName && <div className="info-row"><span>Modstanderens kontakt</span><strong>{match.opponentContactName}</strong></div>}
+              {match.opponentContactPhone && <div className="info-row"><span>Telefon</span><a href={`tel:${match.opponentContactPhone}`}>{match.opponentContactPhone}</a></div>}
+              {match.opponentContactEmail && <div className="info-row"><span>E-mail</span><a href={`mailto:${match.opponentContactEmail}`}>{match.opponentContactEmail}</a></div>}
+              {match.address && <a className="text-link" href={`https://maps.google.com/?q=${encodeURIComponent(match.address)}`} target="_blank" rel="noreferrer">Vis spillested på kort ↗</a>}
+              {match.scheduledAt && <a className="btn btn-light" href={`/api/matches/${match.id}/calendar`}>Føj til kalender ↓</a>}
               {match.rankedInUrl && <a className="btn btn-light" href={match.rankedInUrl} target="_blank" rel="noreferrer">Se den officielle kamp i RankedIn ↗</a>}
             </section>
             {["owner", "captain"].includes(access.role) && <EditFixtureForm fixture={match} />}

@@ -43,7 +43,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
         const existing = byRankedInId ?? byOpponent;
         if (existing?.seasonId !== undefined && existing.seasonId !== id) throw new Error(`RankedIn kamp-ID ${row.rankedInMatchId} tilhører en anden sæson.`);
         if (existing) {
-          await tx.update(fixtures).set({ ...row, sourceType: "csv", sourceUpdatedAt: new Date() })
+          await tx.update(fixtures).set({ ...row, opponentContactName: undefined, opponentContactEmail: undefined, opponentContactPhone: undefined, sourceType: "csv", sourceUpdatedAt: new Date() })
             .where(eq(fixtures.id, existing.id));
           updated++;
         } else {

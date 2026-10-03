@@ -7,6 +7,7 @@ type Fixture = {
   id: string; opponent: string; homeAway: string; scheduledAt: Date | null;
   venue: string | null; address: string | null; rankedInUrl: string | null;
   rankedInMatchId: string | null; result: string | null;
+  opponentContactName: string | null; opponentContactEmail: string | null; opponentContactPhone: string | null;
 };
 
 function dateInput(value: Date | null) {
@@ -19,7 +20,7 @@ function dateInput(value: Date | null) {
 }
 
 function values(form: FormData) {
-  return Object.fromEntries(["opponent", "homeAway", "scheduledAt", "venue", "address", "rankedInUrl", "rankedInMatchId", "result"]
+  return Object.fromEntries(["opponent", "homeAway", "scheduledAt", "venue", "address", "rankedInUrl", "rankedInMatchId", "result", "opponentContactName", "opponentContactEmail", "opponentContactPhone"]
     .map((name) => [name, form.get(name) ?? ""]));
 }
 
@@ -31,6 +32,9 @@ function FixtureFields({ fixture }: { fixture?: Fixture }) {
     <label className="field-label">Resultat (valgfrit)<input className="input" name="result" defaultValue={fixture?.result ?? ""} placeholder="Fx 4-2" maxLength={50} /></label>
     <label className="field-label">Spillested<input className="input" name="venue" defaultValue={fixture?.venue ?? ""} maxLength={200} /></label>
     <label className="field-label">Adresse<input className="input" name="address" defaultValue={fixture?.address ?? ""} maxLength={300} /></label>
+    <label className="field-label">Modstanderens kontakt<input className="input" name="opponentContactName" defaultValue={fixture?.opponentContactName ?? ""} maxLength={150} /></label>
+    <label className="field-label">Kontaktens telefon<input className="input" name="opponentContactPhone" type="tel" defaultValue={fixture?.opponentContactPhone ?? ""} maxLength={50} /></label>
+    <label className="field-label form-wide">Kontaktens e-mail<input className="input" name="opponentContactEmail" type="email" defaultValue={fixture?.opponentContactEmail ?? ""} maxLength={254} /></label>
     <label className="field-label form-wide">RankedIn kamplink<input className="input" name="rankedInUrl" type="url" defaultValue={fixture?.rankedInUrl ?? ""} placeholder="https://www.rankedin.com/…" /></label>
     <label className="field-label form-wide">RankedIn kamp-ID<input className="input" name="rankedInMatchId" defaultValue={fixture?.rankedInMatchId ?? ""} maxLength={100} /></label>
   </div>;
