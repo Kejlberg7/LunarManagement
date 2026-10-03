@@ -17,10 +17,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 .shell { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
 .sidebar { background: var(--forest); color: white; padding: 28px 18px; display: flex; flex-direction: column; gap: 38px; }
+.sidebar-nav { width: 100%; }
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 10px; font-weight: 700; letter-spacing: -.03em; }
 .brand-mark { width: 34px; height: 34px; display: grid; place-items: center; color: var(--forest); background: var(--lime); border-radius: 11px; font-size: 19px; font-weight: 800; }
 .nav-label { margin: 0 10px 10px; color: #a9beb5; font-size: 11px; text-transform: uppercase; letter-spacing: .12em; }
 .nav-link { color: #e4ece8; text-decoration: none; padding: 12px 11px; display: flex; align-items: center; gap: 11px; border-radius: 10px; font-size: 14px; }
+.nav-count { margin-left: auto; border-radius: 999px; padding: 2px 6px; color: var(--forest); background: var(--lime); font-size: 10px; font-weight: 700; }
 .nav-link.active, .nav-link:hover { color: white; background: #ffffff18; }
 .sidebar-spacer { flex: 1; }
 .season-chip { border: 1px solid #ffffff2d; border-radius: 12px; padding: 13px; color: #dce8e1; font-size: 12px; line-height: 1.5; }
@@ -167,6 +169,7 @@ h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -.055em; line-height: 
   .teams-grid { grid-template-columns: 1fr; }
   .shell { grid-template-columns: 76px minmax(0,1fr); }
   .sidebar { align-items: center; padding: 22px 10px; }
+  .sidebar-nav { width: auto; }
   .brand { padding: 0; }
   .brand-name, .nav-label, .nav-text, .season-chip { display: none; }
   .nav-link { justify-content: center; width: 48px; height: 45px; padding: 0; font-size: 18px; }
@@ -181,9 +184,11 @@ h1 { font-size: clamp(28px, 3.3vw, 42px); letter-spacing: -.055em; line-height: 
   .form-wide { grid-column: auto; }
   .shell { display: block; padding-bottom: 72px; }
   .sidebar { position: fixed; z-index: 5; bottom: 0; left: 0; right: 0; height: 64px; padding: 8px 16px; flex-direction: row; justify-content: space-around; gap: 5px; box-shadow: 0 -8px 24px #17261d0d; }
+  .sidebar-nav { display: flex; flex: 1; align-items: center; justify-content: space-around; width: auto; min-width: 0; }
   .brand, .sidebar-spacer, .nav-label { display: none; }
-  .nav-link { display: grid; align-content: center; justify-items: center; gap: 2px; height: 48px; width: 62px; padding: 3px; font-size: 17px; }
-  .nav-text { display: block; font-size: 9px; }
+  .nav-link { position: relative; flex: 1 1 0; min-width: 0; display: grid; align-content: center; justify-items: center; gap: 2px; height: 48px; width: auto; padding: 3px 1px; font-size: 17px; }
+  .nav-text { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; }
+  .nav-count { position: absolute; top: 1px; right: calc(50% - 21px); min-width: 15px; padding: 1px 4px; text-align: center; font-size: 8px; }
   .main { padding: 22px 16px 35px; }
   .topbar { margin-bottom: 28px; }
   .topbar .eyebrow { font-size: 9px; }

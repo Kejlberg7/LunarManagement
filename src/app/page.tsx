@@ -78,14 +78,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     <div className="shell">
       <aside className="sidebar">
         <div className="brand"><span className="brand-mark">L</span><span className="brand-name">Lunar Holdmanager</span></div>
-        <div style={{ width: "100%" }}>
+        <div className="sidebar-nav">
           <p className="nav-label">Hold</p>
           <Link className="nav-link active" href={overviewHref}><span>⌂</span><span className="nav-text">Overblik</span></Link>
           <a className="nav-link" href="#kampe"><span>▦</span><span className="nav-text">Kampe</span></a>
           <a className="nav-link" href="#spillere"><span>♙</span><span className="nav-text">Spillere</span></a>
           <a className="nav-link" href="#indstillinger"><span>⚙</span><span className="nav-text">Indstillinger</span></a>
           <Link className="nav-link" href="/teams"><span>♟</span><span className="nav-text">Hold</span></Link>
-          <Link className="nav-link" href="/notifications"><span>♧</span><span className="nav-text">Beskeder{unread.total ? ` (${unread.total})` : ""}</span></Link>
+          <Link className="nav-link" href="/notifications"><span>♧</span><span className="nav-text">Beskeder</span>{unread.total > 0 && <span className="nav-count">{unread.total > 9 ? "9+" : unread.total}</span>}</Link>
         </div>
         <div className="sidebar-spacer" />
         <div className="season-chip"><strong>{season?.name ?? "Sæson"} {season?.year ?? ""}</strong><br />{access.pool}<br />{access.rankedInId.startsWith("local:") ? "Lokalt hold" : `RankedIn ID: ${access.rankedInId}`}<br /><Link href="/teams">Skift hold eller sæson →</Link></div>
